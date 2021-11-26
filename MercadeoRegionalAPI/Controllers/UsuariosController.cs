@@ -109,7 +109,7 @@ namespace MercadeoRegionalAPI.Controllers
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);
+            return CreatedAtAction("GetUsuario", new { id = usuario.id }, usuario);
         }
 
         // DELETE: api/Usuarios/5
@@ -130,7 +130,7 @@ namespace MercadeoRegionalAPI.Controllers
 
         private bool UsuarioExists(int id)
         {
-            return _context.Usuarios.Any(e => e.Id == id);
+            return _context.Usuarios.Any(e => e.id == id);
         }
     }
 }
