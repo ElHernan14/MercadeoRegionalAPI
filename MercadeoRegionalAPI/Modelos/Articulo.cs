@@ -13,6 +13,7 @@ namespace MercadeoRegionalAPI.Modelos
         [Required]
         public int id { get; set; }
         public string marca { get; set; }
+        public string descripcion { get; set; }
         public decimal precio { get; set; }
 
         public decimal iva { get; set; }
@@ -22,13 +23,13 @@ namespace MercadeoRegionalAPI.Modelos
         public IFormFile avatarFile { get; set; }
         public int estado { get; set; }
         [Display(Name = "Usuario")]
-        [ForeignKey(nameof(idUsuario))]
         public int idUsuario { get; set; }
+        [ForeignKey(nameof(idUsuario))]
+        public Usuario usuario { get; set; }
 
         [Display(Name = "Subcategoria")]
-        [ForeignKey(nameof(idSubcategoria))]
         public int idSubcategoria { get; set; }
-        
-
+        [ForeignKey(nameof(idSubcategoria))]
+        public Subcategoria subcategoria { get; set; }
     }
 }

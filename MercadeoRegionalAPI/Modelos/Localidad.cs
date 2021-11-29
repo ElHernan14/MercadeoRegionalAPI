@@ -11,11 +11,7 @@ namespace MercadeoRegionalAPI.Modelos
     public class Localidad
     {
         [Required]
-        public int Id { get; set; }
-
-        [Display(Name = "idUsuario")]
-        [ForeignKey(nameof(idUsuario))]
-        public int idUsuario { get; set; }
+        public int id { get; set; }
         public string poblacion { get; set; }
         public string avatar { get; set; }
         public string nombre { get; set; }

@@ -46,10 +46,11 @@ namespace MercadeoRegionalAPI.Controllers
 
         // PUT: api/Localidades/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocalidad(int id, Localidad localidad)
+        [HttpPut]
+        public async Task<IActionResult> PutLocalidad([FromBody] Localidad localidad)
         {
-            if (id != localidad.Id)
+            var local = await _context.Localidades.FirstOrDefaultAsync(x => x.id == localidad.id);
+            if (local.id != localidad.id)
             {
                 return BadRequest();
             }
@@ -60,16 +61,9 @@ namespace MercadeoRegionalAPI.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
-                if (!LocalidadExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return BadRequest(ex);
             }
 
             return NoContent();
@@ -83,7 +77,7 @@ namespace MercadeoRegionalAPI.Controllers
             _context.Localidades.Add(localidad);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLocalidad", new { id = localidad.Id }, localidad);
+            return CreatedAtAction("GetLocalidad", new { id = localidad.id }, localidad);
         }
 
         // DELETE: api/Localidades/5
@@ -104,7 +98,7 @@ namespace MercadeoRegionalAPI.Controllers
 
         private bool LocalidadExists(int id)
         {
-            return _context.Localidades.Any(e => e.Id == id);
+            return _context.Localidades.Any(e => e.id == id);
         }
     }
 }

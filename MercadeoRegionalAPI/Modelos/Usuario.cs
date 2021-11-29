@@ -34,6 +34,11 @@ namespace MercadeoRegionalAPI.Modelos
         [NotMapped]//Para EF
         public IFormFile avatarFile { get; set; }
 
+        [Display(Name = "Localidad")]
+        public int idLocalidad { get; set; }
+        [ForeignKey(nameof(idLocalidad))]
+        public Localidad localidad { get; set; }
+
         public static string GetValuesEnum(int clave)
         {
             string valor = null;

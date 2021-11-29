@@ -41,7 +41,7 @@ namespace MercadeoRegionalAPI.Controllers
                 return NotFound();
             }
 
-            return categoria;
+            return Ok(categoria);
         }
 
         // PUT: api/Categorias/5

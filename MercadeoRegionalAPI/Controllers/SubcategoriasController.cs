@@ -27,14 +27,14 @@ namespace MercadeoRegionalAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Subcategoria>>> GetSubcategoria()
         {
-            return await _context.Subcategoria.ToListAsync();
+            return await _context.Subcategorias.ToListAsync();
         }
 
         // GET: api/Subcategorias/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Subcategoria>> GetSubcategoria(int id)
         {
-            var subcategoria = await _context.Subcategoria.FindAsync(id);
+            var subcategoria = await _context.Subcategorias.FindAsync(id);
 
             if (subcategoria == null)
             {
@@ -80,7 +80,7 @@ namespace MercadeoRegionalAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Subcategoria>> PostSubcategoria(Subcategoria subcategoria)
         {
-            _context.Subcategoria.Add(subcategoria);
+            _context.Subcategorias.Add(subcategoria);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetSubcategoria", new { id = subcategoria.id }, subcategoria);
@@ -90,13 +90,13 @@ namespace MercadeoRegionalAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSubcategoria(int id)
         {
-            var subcategoria = await _context.Subcategoria.FindAsync(id);
+            var subcategoria = await _context.Subcategorias.FindAsync(id);
             if (subcategoria == null)
             {
                 return NotFound();
             }
 
-            _context.Subcategoria.Remove(subcategoria);
+            _context.Subcategorias.Remove(subcategoria);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -104,7 +104,7 @@ namespace MercadeoRegionalAPI.Controllers
 
         private bool SubcategoriaExists(int id)
         {
-            return _context.Subcategoria.Any(e => e.id == id);
+            return _context.Subcategorias.Any(e => e.id == id);
         }
     }
 }

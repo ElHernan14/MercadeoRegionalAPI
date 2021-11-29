@@ -25,54 +25,64 @@ namespace MercadeoRegionalAPI.Controllers
 
         // GET: api/DetalleCarritos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DetalleCarrito>>> GetCarrito()
+        public async Task<ActionResult<IEnumerable<DetalleCarrito>>> GetCarritos()
         {
-            return await _context.Carrito.ToListAsync();
+            var usuarioActual = User.Identity.Name;
+            var carritos = await _context.Carrito.Where(x => x.usuario.email == usuarioActual).ToListAsync();
+            return Ok(carritos);
         }
 
-        // GET: api/DetalleCarritos/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<DetalleCarrito>> GetDetalleCarrito(int id)
+        [HttpGet("{estado}")]
+        public async Task<ActionResult<IEnumerable<DetalleCarrito>>> GetCarritosXEstado(int estado)
         {
-            var detalleCarrito = await _context.Carrito.FindAsync(id);
-
-            if (detalleCarrito == null)
-            {
-                return NotFound();
-            }
-
-            return detalleCarrito;
+            var usuarioActual = User.Identity.Name;
+            var carritos = await _context.Carrito.Where(x => x.usuario.email == usuarioActual)
+                .Where(x => x.estado == estado).ToListAsync();
+            return Ok(carritos);
         }
 
-        // PUT: api/DetalleCarritos/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDetalleCarrito(int id, DetalleCarrito detalleCarrito)
+        [HttpGet("{estado}")]
+        public async Task<ActionResult<decimal>> GetTotalCarritoXEstado(int estado)
         {
-            if (id != detalleCarrito.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(detalleCarrito).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DetalleCarritoExists(id))
+                var usuarioActual = User.Identity.Name;
+                decimal total = 0;
+                var carritos = await _context.Carrito.Where(x => x.usuario.email == usuarioActual)
+                    .Include(x => x.articulo).Where(x => x.estado == estado).ToListAsync();
+                var facturas = await _context.Facturas.Where(x => x.usuario.email == usuarioActual).ToListAsync();
+
+                if (estado != 1)
                 {
-                    return NotFound();
+                    if (carritos != null)
+                    {
+                        foreach (DetalleCarrito c in carritos)
+                        {
+                            decimal precio = c.articulo.precio + c.articulo.iva;
+                            total += precio;
+                        }
+                    }
                 }
                 else
                 {
-                    throw;
+                    if (carritos != null && facturas != null)
+                    {
+                        foreach (DetalleCarrito c in carritos)
+                        {
+                            foreach (Factura f in facturas)
+                            {
+                                decimal precio = f.montoTotal;
+                                total += precio;
+                            }
+                        }
+                    }
                 }
+                return Ok(total);
             }
-
-            return NoContent();
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         // POST: api/DetalleCarritos
@@ -80,31 +90,51 @@ namespace MercadeoRegionalAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<DetalleCarrito>> PostDetalleCarrito(DetalleCarrito detalleCarrito)
         {
-            _context.Carrito.Add(detalleCarrito);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDetalleCarrito", new { id = detalleCarrito.Id }, detalleCarrito);
+            try{
+                var username = User.Identity.Name;
+                var usuarioActual = await _context.Usuarios.SingleOrDefaultAsync(x => x.email == username);
+                var articulo = await _context.Articulos.SingleOrDefaultAsync(x => x.id == detalleCarrito.idArticulo);
+                if((usuarioActual.id != detalleCarrito.idUsuario) || (articulo == null))
+                {
+                    return BadRequest();
+                }
+                _context.Carrito.Add(detalleCarrito);
+                await _context.SaveChangesAsync();
+                return Ok(detalleCarrito);
+            }
+            catch(DbUpdateConcurrencyException ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         // DELETE: api/DetalleCarritos/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDetalleCarrito(int id)
+        [HttpDelete("{id}/{idArticulo}")]
+        public async Task<IActionResult> DeleteDetalleCarrito(int id, int idArticulo)
         {
-            var detalleCarrito = await _context.Carrito.FindAsync(id);
-            if (detalleCarrito == null)
+            try
             {
-                return NotFound();
+                var detalleCarrito = await _context.Carrito.Where(x => x.idArticulo == idArticulo)
+                .Where(x => x.id == id).FirstAsync();
+                if (detalleCarrito == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Carrito.Remove(detalleCarrito);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Carrito.Remove(detalleCarrito);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         private bool DetalleCarritoExists(int id)
         {
-            return _context.Carrito.Any(e => e.Id == id);
+            return _context.Carrito.Any(e => e.id == id);
         }
     }
 }

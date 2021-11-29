@@ -10,15 +10,17 @@ namespace MercadeoRegionalAPI.Modelos
     public class DetalleCarrito
     {
         [Required]
-        public int Id { get; set; }
-
-        [Display(Name = "idUsuario")]
-        [ForeignKey(nameof(idUsuario))]
-        public int idUsuario { get; set; }
+        public int id { get; set; }
 
         [Display(Name = "idArticulo")]
-        [ForeignKey(nameof(idArticulo))]
         public int idArticulo { get; set; }
+        [ForeignKey(nameof(idArticulo))]
+        public Articulo articulo { get; set; }
+
+        [Display(Name = "Usuario")]
+        public int idUsuario { get; set; }
+        [ForeignKey(nameof(idUsuario))]
+        public Usuario usuario { get; set; }
         public int estado { get; set; }
         public int cantidad { get; set; }
     }

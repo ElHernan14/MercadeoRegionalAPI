@@ -10,18 +10,20 @@ namespace MercadeoRegionalAPI.Modelos
     public class Factura
     {
         [Required]
-        public int Id { get; set; }
+        public int id { get; set; }
 
-        [Display(Name = "idUsuario")]
-        [ForeignKey(nameof(idUsuario))]
+        [Display(Name = "Usuario")]
         public int idUsuario { get; set; }
+        [ForeignKey(nameof(idUsuario))]
+        public Usuario usuario { get; set; }
 
         [Display(Name = "idCarrito")]
-        [ForeignKey(nameof(idCarrito))]
         public int idCarrito { get; set; }
-        public int estado { get; set; }
+        [ForeignKey(nameof(idCarrito))]
+        public DetalleCarrito carrito { get; set; }
         public string pago { get; set; }
         public string envio { get; set; }
         public decimal montoTotal { get; set; }
+        public int cantidad { get; set; }
     }
 }

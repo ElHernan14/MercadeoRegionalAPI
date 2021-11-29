@@ -27,7 +27,9 @@ namespace MercadeoRegionalAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Articulo>>> GetArticulos()
         {
-            return await _context.Articulos.ToListAsync();
+            var usuarioActual = User.Identity.Name;
+            var articulos = await _context.Articulos.Where(x => x.usuario.email == usuarioActual).ToListAsync();
+            return Ok(articulos);
         }
 
         // GET: api/Articulos/5
@@ -41,20 +43,15 @@ namespace MercadeoRegionalAPI.Controllers
                 return NotFound();
             }
 
-            return articulo;
+            return Ok(articulo);
         }
 
         // PUT: api/Articulos/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutArticulo(int id, Articulo articulo)
+        [HttpPut]
+        public async Task<IActionResult> PutArticulo([FromBody] Articulo articulo)
         {
-            if (id != articulo.id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(articulo).State = EntityState.Modified;
+            _context.Articulos.Update(articulo);
 
             try
             {
@@ -62,7 +59,7 @@ namespace MercadeoRegionalAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ArticuloExists(id))
+                if (!ArticuloExists(articulo.id))
                 {
                     return NotFound();
                 }
@@ -78,33 +75,74 @@ namespace MercadeoRegionalAPI.Controllers
         // POST: api/Articulos
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Articulo>> PostArticulo(Articulo articulo)
+        public async Task<ActionResult<Articulo>> PostArticulo([FromBody] Articulo articulo)
         {
             _context.Articulos.Add(articulo);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetArticulo", new { id = articulo.id }, articulo);
-        }
-
-        // DELETE: api/Articulos/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteArticulo(int id)
-        {
-            var articulo = await _context.Articulos.FindAsync(id);
-            if (articulo == null)
-            {
-                return NotFound();
-            }
-
-            _context.Articulos.Remove(articulo);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok(articulo);
         }
 
         private bool ArticuloExists(int id)
         {
             return _context.Articulos.Any(e => e.id == id);
+        }
+
+        [HttpGet("{descripcion}/{localidad}")]
+        public async Task<ActionResult<IEnumerable<Articulo>>> GetArticulosLike(string descripcion, string localidad)
+        {
+            try
+            {
+                var usuarioActual = User.Identity.Name;
+                var articulos = await _context.Articulos.Include(x => x.usuario).Include(x => x.subcategoria)
+                                .Where(x => x.descripcion.Contains(descripcion)).Where
+                                (x => x.subcategoria.descripcion.Contains(descripcion)).Where
+                                (x => x.marca.Contains(descripcion)).Where
+                                (x => x.usuario.localidad.nombre.Contains(localidad)).Where
+                                (x => x.usuario.email == usuarioActual).Where
+                                (x => x.estado == 1).ToListAsync();
+                return Ok(articulos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+        [HttpGet("{estado}")]
+        public async Task<ActionResult<IEnumerable<Articulo>>> GetArticulosXEstado(int estado)
+        {
+            try
+            {
+                var usuarioActual = User.Identity.Name;
+                var articulos = await _context.Articulos.Include(x => x.usuario).Include(x => x.subcategoria)
+                                .Where(x => x.usuario.email == usuarioActual)
+                                .Where(x => x.estado == estado).ToListAsync();
+                return Ok(articulos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+        [HttpGet("{local}/{sub}")]
+        public async Task<ActionResult<IEnumerable<Articulo>>> GetArticulosXLocalidadSubcategoria(int local, int sub)
+        {
+            try
+            {
+                var usuarioActual = User.Identity.Name;
+                var articulos = await _context.Articulos.Include(x => x.usuario).Include(x => x.subcategoria)
+                                .Where(x => x.usuario.email == usuarioActual)
+                                .Where(x => x.idSubcategoria == sub)
+                                .Where(x => x.estado == 1)
+                                .Where(x => x.usuario.idLocalidad == local).ToListAsync();
+                return Ok(articulos);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
     }
 }

@@ -13,9 +13,9 @@ namespace MercadeoRegionalAPI.Modelos
         public int id { get; set; }
         public string descripcion { get; set; }
         public string tipo { get; set; }
-        [Display(Name = "idSubcategoria")]
-        [ForeignKey(nameof(idSubcategoria))]
-        public int idSubcategoria { get; set; }
-
+        [Display(Name = "idCategoria")]
+        public int idCategoria { get; set; }
+        [ForeignKey(nameof(idCategoria))]
+        public Categoria categoria { get; set; }
     }
 }
